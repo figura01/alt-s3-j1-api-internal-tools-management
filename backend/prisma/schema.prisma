@@ -1,0 +1,64 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Department {
+  Engineering
+  Sales
+  Marketing
+  HR
+  Finance
+  Operations
+  Design
+}
+
+enum ToolStatus {
+  active
+  deprecated
+  trial
+}
+
+model Category {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  tools     Tool[]
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("categories")
+}
+
+model Tool {
+  id               Int           @id @default(autoincrement())
+  name             String        @unique
+  description      String
+  vendor           String
+  websiteUrl       String?       @map("website_url")
+  monthlyCost      Decimal       @map("monthly_cost") @db.Decimal(10, 2)
+  ownerDepartment  Department    @map("owner_department")
+  status           ToolStatus    @default(active)
+  activeUsersCount Int           @default(0) @map("active_users_count")
+  categoryId       Int           @map("category_id")
+  category         Category      @relation(fields: [categoryId], references: [id])
+  usageMetrics     UsageMetric[]
+  createdAt        DateTime      @default(now()) @map("created_at")
+  updatedAt        DateTime      @updatedAt @map("updated_at")
+
+  @@map("tools")
+}
+
+model UsageMetric {
+  id                Int      @id @default(autoincrement())
+  toolId            Int      @map("tool_id")
+  tool              Tool     @relation(fields: [toolId], references: [id], onDelete: Cascade)
+  period            String
+  totalSessions     Int      @map("total_sessions")
+  avgSessionMinutes Int      @map("avg_session_minutes")
+  createdAt         DateTime @default(now()) @map("created_at")
+
+  @@map("usage_metrics")
+}
