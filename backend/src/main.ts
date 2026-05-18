@@ -9,6 +9,8 @@ async function bootstrap() {
 
   app.setGlobalPrefix('api');
 
+  app.useGlobalFilters(new HttpExceptionFilter());
+
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
